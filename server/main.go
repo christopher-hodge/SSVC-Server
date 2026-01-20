@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"backend/internal/api"
+	"SSVC-Server/internal/api"
 )
 
 func main() {

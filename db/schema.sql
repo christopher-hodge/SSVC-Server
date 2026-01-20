@@ -5,14 +5,16 @@ CREATE TABLE players (
     last_login_at  TIMESTAMP
 );
 
-CREATE TABLE item_definitions (
-    item_type_id   TEXT PRIMARY KEY,
-    name           TEXT NOT NULL,
-    rarity         TEXT NOT NULL,
-    max_stack      INT NOT NULL DEFAULT 1,
-    base_stats     JSONB NOT NULL,
-    created_at     TIMESTAMP NOT NULL DEFAULT NOW()
-);
+CREATE TABLE items (
+  id UUID,
+  owner_id UUID,
+  base_type TEXT,
+  rarity INT,
+  item_level INT,
+  prefixes JSONB,
+  suffixes JSONB
+)
+
 
 CREATE TABLE loot_tables (
     loot_table_id  TEXT PRIMARY KEY,

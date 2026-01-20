@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"backend/internal/match"
-	ws "backend/internal/websocket"
+	"SSVC-Server/internal/match"
+	ws "SSVC-Server/internal/websocket"
 )
 
 func Health(w http.ResponseWriter, r *http.Request) {
