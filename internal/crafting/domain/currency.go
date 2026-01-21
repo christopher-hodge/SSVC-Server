@@ -3,13 +3,14 @@ package domain
 type CurrencyType string
 
 const (
-	CurrencyTransmutation CurrencyType = "orb_of_transmutation"
-	CurrencyAlteration    CurrencyType = "orb_of_alteration"
+	CurrencyImbuementCatalyst      CurrencyType = "imbuement_catalyst"
+	CurrencyReconstructionCatalyst CurrencyType = "reconstruction_catalyst"
 )
 
 type CraftingContext struct {
-	RNG  RandomSource
-	Item *Item
+	RNG         RandomSource
+	Item        *Item
+	AffixRoller AffixRoller
 }
 
 type Currency interface {
