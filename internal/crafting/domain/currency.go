@@ -8,7 +8,6 @@ const (
 )
 
 type CraftingContext struct {
-	RNG         RandomSource
 	Item        *Item
 	AffixRoller AffixRoller
 }
