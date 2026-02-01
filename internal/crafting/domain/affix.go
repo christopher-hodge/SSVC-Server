@@ -5,10 +5,15 @@ type AffixType int
 const (
 	Prefix AffixType = iota
 	Suffix
+	Both
+	OnlyPrefixes
+	OnlySuffixes
+	All
 )
 
 type AffixDefinition struct {
 	ID       string
+	Name     string
 	Type     AffixType
 	Tags     []string
 	MinValue int

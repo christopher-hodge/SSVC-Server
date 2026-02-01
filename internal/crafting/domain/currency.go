@@ -1,5 +1,9 @@
 package domain
 
+import (
+	"SSVC-Server/internal/random"
+)
+
 type CurrencyType string
 
 const (
@@ -8,8 +12,9 @@ const (
 )
 
 type CraftingContext struct {
-	Item        *Item
-	AffixRoller AffixRoller
+	Item   *Item
+	RNG    *random.RNG
+	Tables []AffixDefinition
 }
 
 type Currency interface {

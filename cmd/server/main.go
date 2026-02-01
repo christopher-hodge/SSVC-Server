@@ -4,12 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"SSVC-Server/internal/api"
+	handlers "SSVC-Server/internal/handlers/http"
 )
 
 func main() {
-	router := api.NewRouter()
+
+	router := handlers.NewRouter()
 
 	log.Println("Go backend running on :8080")
+
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

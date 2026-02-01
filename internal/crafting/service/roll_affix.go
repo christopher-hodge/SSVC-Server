@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"SSVC-Server/internal/crafting/domain"
-	"SSVC-Server/internal/crafting/tables"
 )
 
 func RollAffix(
@@ -12,9 +11,9 @@ func RollAffix(
 	affixType domain.AffixType,
 ) (domain.AffixInstance, error) {
 
-	candidates := make([]domain.AffixDefinition, 0)
+	validAffixes := make([]domain.AffixDefinition, 0)
 
-	for _, def := range tables.AffixPool {
+	for _, def := range domain.AffixPool {
 		if def.Type != affixType {
 			continue
 		}
@@ -23,20 +22,19 @@ func RollAffix(
 			continue
 		}
 
-		// future: tag checks, meta-mod blocking, influence, etc.
-		candidates = append(candidates, def)
+		validAffixes = append(validAffixes, def)
 	}
 
-	if len(candidates) == 0 {
+	if len(validAffixes) == 0 {
 		return domain.AffixInstance{}, errors.New("no valid affixes")
 	}
 
-	chosen := weightedRoll(ctx.RNG, candidates)
+	chosenAffix := weightedRoll(validAffixes)
 
-	value := ctx.RNG.Intn(chosen.MaxValue-chosen.MinValue+1) + chosen.MinValue
+	value := ctx.RNG.Intn(chosenAffix.MaxValue-chosenAffix.MinValue+1) + chosenAffix.MinValue
 
 	return domain.AffixInstance{
-		DefID: chosen.ID,
+		DefID: chosenAffix.ID,
 		Value: value,
 	}, nil
 }
