@@ -49,11 +49,11 @@ func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 
 	item := ctx.Item
 
-	if item.Rarity != domain.Normal {
-		return errors.New("Item must be Normal.")
+	if item.Rarity != domain.Magic {
+		return errors.New("Item must be Magic.")
 	}
 
-	item.Rarity = domain.Magic
+	item.Rarity = domain.Rare
 
 	newAffixType := ctx.RNG.Intn(2)
 

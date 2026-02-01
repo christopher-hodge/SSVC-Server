@@ -4,11 +4,26 @@ import "errors"
 
 func CanAddAffix(item *Item, affixType AffixType) error {
 
-	if affixType == Prefix && len(item.Prefixes) >= 3 {
+	maxPrefixes := 0
+	maxSuffixes := 0
+
+	switch item.Rarity {
+	case Normal:
+		maxPrefixes = 0
+		maxSuffixes = 0
+	case Magic:
+		maxPrefixes = 1
+		maxSuffixes = 1
+	case Rare:
+		maxPrefixes = 3
+		maxSuffixes = 3
+	}
+
+	if affixType == Prefix && len(item.Prefixes) >= maxPrefixes {
 		return errors.New("max prefixes reached")
 	}
 
-	if affixType == Suffix && len(item.Suffixes) >= 3 {
+	if affixType == Suffix && len(item.Suffixes) >= maxSuffixes {
 		return errors.New("max suffixes reached")
 	}
 
