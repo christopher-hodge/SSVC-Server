@@ -9,12 +9,40 @@ const (
 	Unique
 )
 
+type AffixLimits struct {
+	MaxImplicits int
+	MaxPrefixes  int
+	MaxSuffixes  int
+}
+
+var AffixLimitsByRarity = map[Rarity]AffixLimits{
+	Normal: {
+		MaxImplicits: 3,
+		MaxPrefixes:  0,
+		MaxSuffixes:  0,
+	},
+	Magic: {
+		MaxImplicits: 3,
+		MaxPrefixes:  1,
+		MaxSuffixes:  1,
+	},
+	Rare: {
+		MaxImplicits: 3,
+		MaxPrefixes:  3,
+		MaxSuffixes:  3,
+	},
+	Unique: {
+		MaxImplicits: 3,
+		MaxPrefixes:  0,
+		MaxSuffixes:  0,
+	},
+}
+
 type Item struct {
 	ID        string
 	BaseType  string
 	Rarity    Rarity
 	ItemLevel int
-
-	Prefixes []AffixInstance
-	Suffixes []AffixInstance
+	Prefixes  []AffixInstance
+	Suffixes  []AffixInstance
 }

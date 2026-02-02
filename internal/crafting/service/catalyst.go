@@ -20,6 +20,7 @@ func (c *ImbuementCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 
 	item.Rarity = domain.Magic
 
+	// Determines if this is a prefix (0) or suffix (1)
 	newAffixType := ctx.RNG.Intn(2)
 
 	return ApplyAffix(ctx, domain.AffixType(newAffixType))
@@ -40,6 +41,7 @@ func (c *ReconstructionCatalyst) Apply(ctx *domain.CraftingContext) error {
 	item.Prefixes = []domain.AffixInstance{}
 	item.Suffixes = []domain.AffixInstance{}
 
+	//Determines if this is a prefix (0), suffix (1), or both(2)
 	newAffixType := ctx.RNG.Intn(3)
 
 	return ApplyAffix(ctx, domain.AffixType(newAffixType))
@@ -55,6 +57,7 @@ func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 
 	item.Rarity = domain.Rare
 
+	// Determines if this is a prefix (0) or suffix (1)
 	newAffixType := ctx.RNG.Intn(2)
 
 	return ApplyAffix(ctx, domain.AffixType(newAffixType))

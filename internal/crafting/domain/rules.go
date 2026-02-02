@@ -4,27 +4,47 @@ import "errors"
 
 func CanAddAffix(item *Item, affixType AffixType) error {
 
-	maxPrefixes := 0
-	maxSuffixes := 0
-
-	switch item.Rarity {
-	case Normal:
-		maxPrefixes = 0
-		maxSuffixes = 0
-	case Magic:
-		maxPrefixes = 1
-		maxSuffixes = 1
-	case Rare:
-		maxPrefixes = 3
-		maxSuffixes = 3
+	if item.Rarity == Normal {
+		return errors.New("Normal items cannot have affixes.")
 	}
 
-	if affixType == Prefix && len(item.Prefixes) >= maxPrefixes {
-		return errors.New("max prefixes reached")
+	limits := AffixLimitsByRarity[item.Rarity]
+
+	switch affixType {
+	case Prefix:
+		if len(item.Prefixes) >= limits.MaxPrefixes {
+			return errors.New("Maximum prefixes reached.")
+		}
+
+	case Suffix:
+		if len(item.Suffixes) >= limits.MaxSuffixes {
+			return errors.New("Maximum suffixes reached.")
+		}
+
+	case Both:
+		prefixFull := len(item.Prefixes) >= limits.MaxPrefixes
+		suffixFull := len(item.Suffixes) >= limits.MaxSuffixes
+
+		if prefixFull && suffixFull {
+			return errors.New("Maximum affixes reached.")
+		}
+
 	}
 
-	if affixType == Suffix && len(item.Suffixes) >= maxSuffixes {
-		return errors.New("max suffixes reached")
+	return nil
+}
+
+func CanRemoveAffix(item *Item, affixType AffixType) error {
+
+	switch affixType {
+	case Prefix:
+		if len(item.Prefixes) == 0 {
+			return errors.New("No prefixes are able to be removed.")
+		}
+	case Suffix:
+		if len(item.Suffixes) == 0 {
+			return errors.New("No suffixes are able to be removed.")
+		}
 	}
 
 	return nil

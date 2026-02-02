@@ -26,7 +26,7 @@ func RollAffix(
 	}
 
 	if len(validAffixes) == 0 {
-		return domain.AffixInstance{}, errors.New("no valid affixes")
+		return domain.AffixInstance{}, errors.New("No valid affixes")
 	}
 
 	chosenAffix := weightedRoll(validAffixes)
