@@ -7,17 +7,7 @@ func ApplyAffix(
 	affixType domain.AffixType,
 ) error {
 
-	maxPrefixes := 0
-	maxSuffixes := 0
-
-	switch ctx.Item.Rarity {
-	case domain.Magic:
-		maxPrefixes = 1
-		maxSuffixes = 1
-	case domain.Rare:
-		maxPrefixes = 3
-		maxSuffixes = 3
-	}
+	limits := domain.AffixLimitsByRarity[ctx.Item.Rarity]
 
 	if err := domain.CanAddAffix(ctx.Item, affixType); err != nil {
 		return err
@@ -26,10 +16,10 @@ func ApplyAffix(
 	//Only checks if the affixType is Both, then sets it to a vaild affix
 	if affixType == domain.Both {
 		switch {
-		case len(ctx.Item.Prefixes) < maxPrefixes && len(ctx.Item.Suffixes) < maxSuffixes:
+		case len(ctx.Item.Prefixes) < limits.MaxPrefixes && len(ctx.Item.Suffixes) < limits.MaxSuffixes:
 			affixType = domain.AffixType(ctx.RNG.Intn(2))
 
-		case len(ctx.Item.Prefixes) < maxPrefixes:
+		case len(ctx.Item.Prefixes) < limits.MaxPrefixes:
 			affixType = domain.Prefix
 
 		default:
