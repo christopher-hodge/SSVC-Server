@@ -25,4 +25,5 @@ type AffixDefinition struct {
 type AffixInstance struct {
 	DefID string
 	Value int
+	Tags  []string
 }
