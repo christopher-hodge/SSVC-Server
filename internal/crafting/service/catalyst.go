@@ -90,7 +90,7 @@ func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 	})
 }
 
-func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
+func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext) error {
 	count := ctx.RNG.Intn(6) + 1
 
 	return ExecutePipeline(ctx, []CraftStep{
