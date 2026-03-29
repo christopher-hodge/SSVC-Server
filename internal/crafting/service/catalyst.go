@@ -11,6 +11,7 @@ type ReconstructionCatalyst struct{}
 type ElevatingCatalyst struct{}
 type DefiantCatalyst struct{}
 type AscendantCatalyst struct{}
+type LustratingCatalyst struct{}
 
 type CraftStep func(ctx *domain.CraftingContext) error
 
@@ -32,7 +33,20 @@ func RequireRarity(r domain.Rarity) CraftStep {
 	}
 }
 
-func ClearAffixes() CraftStep {
+func ClearAffixes(i domain.Item) CraftStep {
+	if !i.HasPrefixModifier("lock_prefixes") {
+		return func(ctx *domain.CraftingContext) error {
+			i.Suffixes = []domain.AffixInstance{}
+			return nil
+		}
+	}
+	if !i.HasSuffixModifier("lock_suffixes") {
+		return func(ctx *domain.CraftingContext) error {
+			ctx.Item.Prefixes = []domain.AffixInstance{}
+			return nil
+		}
+	}
+
 	return func(ctx *domain.CraftingContext) error {
 		ctx.Item.Prefixes = []domain.AffixInstance{}
 		ctx.Item.Suffixes = []domain.AffixInstance{}
@@ -45,6 +59,22 @@ func SetRarity(r domain.Rarity) CraftStep {
 		ctx.Item.Rarity = r
 		return nil
 	}
+}
+
+func InferRarityFromAffixes(item *domain.Item) domain.Rarity {
+	prefixCount := len(item.Prefixes)
+	suffixCount := len(item.Suffixes)
+
+	if prefixCount == 0 && suffixCount == 0 {
+		return domain.Normal
+	}
+
+	magic := domain.AffixLimitsByRarity[domain.Magic]
+	if prefixCount <= magic.MaxPrefixes && suffixCount <= magic.MaxSuffixes {
+		return domain.Magic
+	}
+
+	return domain.Rare
 }
 
 func AddAffix(affixType domain.AffixType) CraftStep {
@@ -64,6 +94,8 @@ func AddAffixes(count int, affixType domain.AffixType) CraftStep {
 	}
 }
 
+//Crafting item functions
+
 func (c *ImbuementCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Normal),
@@ -77,7 +109,7 @@ func (c *ReconstructionCatalyst) Apply(ctx *domain.CraftingContext) error {
 
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Magic),
-		ClearAffixes(),
+		ClearAffixes(*ctx.Item),
 		AddAffixes(count, domain.All),
 	})
 }
@@ -95,7 +127,7 @@ func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext) error {
 
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
-		ClearAffixes(),
+		ClearAffixes(*ctx.Item),
 		AddAffixes(count, domain.All),
 	})
 }
@@ -104,5 +136,12 @@ func (c *AscendantCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
 		AddAffix(domain.Both),
+	})
+}
+
+func (c *LustratingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
+	return ExecutePipeline(ctx, []CraftStep{
+		ClearAffixes(*ctx.Item),
+		SetRarity(InferRarityFromAffixes(ctx.Item)),
 	})
 }

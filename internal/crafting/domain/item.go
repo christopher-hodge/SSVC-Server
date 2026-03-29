@@ -52,3 +52,21 @@ type Item struct {
 	Prefixes  []AffixInstance
 	Suffixes  []AffixInstance
 }
+
+func (i *Item) HasPrefixModifier(defID string) bool {
+	for _, aff := range i.Prefixes {
+		if aff.DefID == defID {
+			return true
+		}
+	}
+	return false
+}
+
+func (i *Item) HasSuffixModifier(defID string) bool {
+	for _, aff := range i.Suffixes {
+		if aff.DefID == defID {
+			return true
+		}
+	}
+	return false
+}
