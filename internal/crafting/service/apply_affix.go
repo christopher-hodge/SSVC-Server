@@ -52,32 +52,3 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 
 	return nil
 }
-
-func ApplyMultipleAffixesLogic(
-	ctx *domain.CraftingContext,
-	affixType domain.AffixType,
-	count int,
-) error {
-
-	for i := 0; i < count; i++ {
-		switch affixType {
-
-		case domain.OnlyPrefixes:
-			if err := ApplyAffixLogic(ctx, domain.Prefix); err != nil {
-				return err
-			}
-
-		case domain.OnlySuffixes:
-			if err := ApplyAffixLogic(ctx, domain.Suffix); err != nil {
-				return err
-			}
-
-		case domain.All:
-			if err := ApplyAffixLogic(ctx, domain.Both); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}

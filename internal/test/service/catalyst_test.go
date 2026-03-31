@@ -20,6 +20,12 @@ func testApplyAffix(ctx *domain.CraftingContext, t domain.AffixType) error {
 // --- Helpers ---
 //
 
+var rarityNames = map[domain.Rarity]string{
+	domain.Normal: "Normal",
+	domain.Magic:  "Magic",
+	domain.Rare:   "Rare",
+}
+
 func newTestItem(rarity domain.Rarity) *domain.Item {
 	return &domain.Item{
 		Rarity:   rarity,
@@ -136,7 +142,7 @@ func TestDefiantCatalyst(t *testing.T) {
 
 func TestLustratingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
-	// Pre-fill affixes so ClearAffixes has effect
+
 	ctx.Item.Prefixes = []domain.AffixInstance{{}}
 	ctx.Item.Suffixes = []domain.AffixInstance{{}}
 
@@ -154,6 +160,34 @@ func TestLustratingCatalyst(t *testing.T) {
 
 	// After clearing, rarity should be Normal (no affixes)
 	if ctx.Item.Rarity != domain.Normal {
-		t.Fatalf("expected Normal rarity after clearing, got %v", ctx.Item.Rarity)
+		t.Fatalf("expected Normal rarity after clearing, got %s", rarityNames[ctx.Item.Rarity])
+	}
+}
+
+func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
+	ctx := newTestContext(domain.Rare)
+
+	// Pre-fill affixes
+	ctx.Item.Prefixes = []domain.AffixInstance{{}, {}}
+	ctx.Item.Suffixes = []domain.AffixInstance{{DefID: "lock_prefixes", Value: 1, Tags: []string{"lock_prefixes"}}, {}}
+
+	c := &service.LustratingCatalyst{}
+	if err := c.Apply(ctx, domain.Both); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Prefixes should remain because they are locked
+	if len(ctx.Item.Prefixes) != 2 {
+		t.Fatalf("expected prefixes to remain, got %d", len(ctx.Item.Prefixes))
+	}
+
+	// Suffixes should have been cleared
+	if len(ctx.Item.Suffixes) != 0 {
+		t.Fatalf("expected suffixes cleared, got %d", len(ctx.Item.Suffixes))
+	}
+
+	// Rarity should be inferred from remaining mods
+	if ctx.Item.Rarity != domain.Rare { // depending on limits
+		t.Fatalf("expected Rare rarity after clearing, got %s", rarityNames[ctx.Item.Rarity])
 	}
 }
