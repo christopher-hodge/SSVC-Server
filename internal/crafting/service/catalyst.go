@@ -37,11 +37,11 @@ func ClearAffixes() CraftStep {
 	return func(ctx *domain.CraftingContext) error {
 
 		if !ctx.Item.HasPrefixModifier("lock_prefixes") {
-			ctx.Item.Suffixes = nil
+			ctx.Item.Prefixes = nil
 		}
 
 		if !ctx.Item.HasSuffixModifier("lock_suffixes") {
-			ctx.Item.Prefixes = nil
+			ctx.Item.Suffixes = nil
 		}
 
 		return nil
@@ -69,6 +69,13 @@ func InferRarityFromAffixes(item *domain.Item) domain.Rarity {
 	}
 
 	return domain.Rare
+}
+
+func InferAndSetRarity() CraftStep {
+	return func(ctx *domain.CraftingContext) error {
+		ctx.Item.Rarity = InferRarityFromAffixes(ctx.Item)
+		return nil
+	}
 }
 
 func AddAffixes(count int, affixType domain.AffixType) CraftStep {
@@ -129,10 +136,8 @@ func (c *AscendantCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 
 func (c *LustratingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
 
-	newRarity := InferRarityFromAffixes(ctx.Item)
-
 	return ExecutePipeline(ctx, []CraftStep{
 		ClearAffixes(),
-		SetRarity(newRarity),
+		InferAndSetRarity(),
 	})
 }

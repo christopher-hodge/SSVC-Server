@@ -8,12 +8,12 @@ import (
 func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) error {
 	limits := domain.AffixLimitsByRarity[ctx.Item.Rarity]
 
-	if affixType == domain.Prefix && ctx.Item.HasPrefixModifier("cannot_roll_prefixes") {
-		return errors.New("cannot roll prefixes")
+	if affixType == domain.Prefix && ctx.Item.HasPrefixModifier("lock_suffixes") {
+		return errors.New("cannot roll suffixes")
 	}
 
-	if affixType == domain.Suffix && ctx.Item.HasSuffixModifier("cannot_roll_suffixes") {
-		return errors.New("cannot roll suffixes")
+	if affixType == domain.Suffix && ctx.Item.HasSuffixModifier("lock_prefixes") {
+		return errors.New("cannot roll prefixes")
 	}
 
 	if affixType == domain.Both || affixType == domain.All {

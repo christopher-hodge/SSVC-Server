@@ -151,14 +151,11 @@ func TestLustratingCatalyst(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// All affixes should be cleared, rarity inferred
 	if len(ctx.Item.Prefixes) == 0 && len(ctx.Item.Suffixes) == 0 {
-		// Expected
 	} else {
 		t.Fatal("expected all affixes cleared")
 	}
 
-	// After clearing, rarity should be Normal (no affixes)
 	if ctx.Item.Rarity != domain.Normal {
 		t.Fatalf("expected Normal rarity after clearing, got %s", rarityNames[ctx.Item.Rarity])
 	}
