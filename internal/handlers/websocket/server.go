@@ -80,7 +80,7 @@ func (c *WSClient) handleCraft(raw json.RawMessage) {
 
 	ctx := &domain.CraftingContext{
 		Item: &domain.Item{Rarity: domain.Normal},
-		RNG:  c.RNG,
+		RNG:  *c.RNG,
 	}
 
 	var err error

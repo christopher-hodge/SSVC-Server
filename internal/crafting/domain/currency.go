@@ -6,7 +6,7 @@ import (
 
 type CraftingContext struct {
 	Item   *Item
-	RNG    *random.RNG
+	RNG    random.RNG
 	Tables []AffixDefinition
 }
 
