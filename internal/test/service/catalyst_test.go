@@ -165,7 +165,7 @@ func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
 	// Pre-fill affixes
-	ctx.Item.Prefixes = []domain.AffixInstance{{}, {}}
+	ctx.Item.Prefixes = []domain.AffixInstance{{DefID: "test", Value: 1, Tags: []string{"test"}}, {DefID: "test2", Value: 1, Tags: []string{"test2"}}}
 	ctx.Item.Suffixes = []domain.AffixInstance{{DefID: "lock_prefixes", Value: 1, Tags: []string{"lock_prefixes"}}, {}}
 
 	c := &service.LustratingCatalyst{}

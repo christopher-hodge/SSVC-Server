@@ -36,11 +36,11 @@ func RequireRarity(r domain.Rarity) CraftStep {
 func ClearAffixes() CraftStep {
 	return func(ctx *domain.CraftingContext) error {
 
-		if !ctx.Item.HasPrefixModifier("lock_prefixes") {
+		if !ctx.Item.HasSuffixModifier("lock_prefixes") {
 			ctx.Item.Prefixes = nil
 		}
 
-		if !ctx.Item.HasSuffixModifier("lock_suffixes") {
+		if !ctx.Item.HasPrefixModifier("lock_suffixes") {
 			ctx.Item.Suffixes = nil
 		}
 
