@@ -11,8 +11,8 @@ import (
 
 // test ApplyAffix function
 func testApplyAffix(ctx *domain.CraftingContext, t domain.AffixType) error {
-	ctx.Item.Prefixes = append(ctx.Item.Prefixes, domain.AffixInstance{})
-	ctx.Item.Suffixes = append(ctx.Item.Suffixes, domain.AffixInstance{})
+	ctx.Item.Prefixes = append(ctx.Item.Prefixes, domain.AffixDefinition{})
+	ctx.Item.Suffixes = append(ctx.Item.Suffixes, domain.AffixDefinition{})
 	return nil
 }
 
@@ -29,8 +29,8 @@ var rarityNames = map[domain.Rarity]string{
 func newTestItem(rarity domain.Rarity) *domain.Item {
 	return &domain.Item{
 		Rarity:   rarity,
-		Prefixes: []domain.AffixInstance{},
-		Suffixes: []domain.AffixInstance{},
+		Prefixes: []domain.AffixDefinition{},
+		Suffixes: []domain.AffixDefinition{},
 	}
 }
 
@@ -143,8 +143,8 @@ func TestDefiantCatalyst(t *testing.T) {
 func TestLustratingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
-	ctx.Item.Prefixes = []domain.AffixInstance{{}}
-	ctx.Item.Suffixes = []domain.AffixInstance{{}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{}}
 
 	c := &service.LustratingCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {
@@ -165,8 +165,8 @@ func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
 	// Pre-fill affixes
-	ctx.Item.Prefixes = []domain.AffixInstance{{DefID: "test", Value: 1, Tags: []string{"test"}}, {DefID: "test2", Value: 1, Tags: []string{"test2"}}}
-	ctx.Item.Suffixes = []domain.AffixInstance{{DefID: "lock_prefixes", Value: 1, Tags: []string{"lock_prefixes"}}, {}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
 	c := &service.LustratingCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {

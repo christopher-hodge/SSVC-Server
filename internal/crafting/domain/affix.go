@@ -12,14 +12,15 @@ const (
 )
 
 type AffixDefinition struct {
-	ID       string
-	Name     string
-	Type     AffixType
-	Tags     []string
-	MinValue int
-	MaxValue int
-	Weight   int
-	MinLevel int
+	ID             string
+	Name           string
+	Type           AffixType
+	Tags           []string
+	MinValue       int
+	MaxValue       int
+	DisplayedValue int
+	Weight         int
+	MinLevel       int
 }
 
 type AffixInstance struct {

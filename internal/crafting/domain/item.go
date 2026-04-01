@@ -49,22 +49,22 @@ type Item struct {
 	BaseType  string
 	Rarity    Rarity
 	ItemLevel int
-	Prefixes  []AffixInstance
-	Suffixes  []AffixInstance
+	Prefixes  []AffixDefinition
+	Suffixes  []AffixDefinition
 }
 
-func (i *Item) HasPrefixModifier(defID string) bool {
+func (i *Item) HasPrefixModifier(id string) bool {
 	for _, aff := range i.Prefixes {
-		if aff.DefID == defID {
+		if aff.ID == id {
 			return true
 		}
 	}
 	return false
 }
 
-func (i *Item) HasSuffixModifier(defID string) bool {
+func (i *Item) HasSuffixModifier(id string) bool {
 	for _, aff := range i.Suffixes {
-		if aff.DefID == defID {
+		if aff.ID == id {
 			return true
 		}
 	}
