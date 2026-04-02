@@ -9,16 +9,7 @@ import (
 	"SSVC-Server/internal/random"
 )
 
-// test ApplyAffix function
-func testApplyAffix(ctx *domain.CraftingContext, t domain.AffixType) error {
-	ctx.Item.Prefixes = append(ctx.Item.Prefixes, domain.AffixDefinition{})
-	ctx.Item.Suffixes = append(ctx.Item.Suffixes, domain.AffixDefinition{})
-	return nil
-}
-
-//
-// --- Helpers ---
-//
+//Helpers
 
 var rarityNames = map[domain.Rarity]string{
 	domain.Normal: "Normal",
@@ -90,7 +81,7 @@ func TestImbuementCatalyst(t *testing.T) {
 	if ctx.Item.Rarity != domain.Magic {
 		t.Fatalf("expected Magic rarity, got %v", ctx.Item.Rarity)
 	}
-	if len(ctx.Item.Prefixes) != 1 && len(ctx.Item.Suffixes) != 1 {
+	if len(ctx.Item.Prefixes)+len(ctx.Item.Suffixes) != 1 {
 		t.Fatal("expected either 1 prefix or 1 suffix applied")
 	}
 }
@@ -139,15 +130,23 @@ func TestElevatingCatalyst(t *testing.T) {
 
 func TestAscendantCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+
+	oldAffixCount := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
 
 	c := &service.AscendantCatalyst{}
+
 	if err := c.Apply(ctx, domain.Both); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(ctx.Item.Prefixes) != 1 || len(ctx.Item.Suffixes) != 1 {
-		t.Fatal("expected 1 prefix and 1 suffix applied")
+	newAffixCount := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
+
+	if newAffixCount <= oldAffixCount {
+		t.Fatalf("expected more affixes applied, got %d", newAffixCount)
 	}
+
 }
 
 func TestDefiantCatalyst(t *testing.T) {
@@ -160,6 +159,18 @@ func TestDefiantCatalyst(t *testing.T) {
 
 	if len(ctx.Item.Prefixes) == 0 || len(ctx.Item.Suffixes) == 0 {
 		t.Fatal("expected affixes to be applied")
+	}
+
+	if len(ctx.Item.Prefixes) < 1 || len(ctx.Item.Suffixes) < 1 {
+		t.Fatal("expected between 1 and 6 affixes applied")
+	}
+
+	if len(ctx.Item.Prefixes) < 3 || len(ctx.Item.Suffixes) < 3 {
+		t.Fatal("expected at least 3 affixes applied")
+	}
+
+	if len(ctx.Item.Prefixes) > 6 || len(ctx.Item.Suffixes) > 6 {
+		t.Fatal("too many affixes applied, expected between 1 and 6")
 	}
 }
 
@@ -187,7 +198,6 @@ func TestLustratingCatalyst(t *testing.T) {
 func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
-	// Pre-fill affixes
 	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
@@ -196,18 +206,15 @@ func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Prefixes should remain because they are locked
 	if len(ctx.Item.Prefixes) != 2 {
 		t.Fatalf("expected prefixes to remain, got %d", len(ctx.Item.Prefixes))
 	}
 
-	// Suffixes should have been cleared
 	if len(ctx.Item.Suffixes) != 0 {
 		t.Fatalf("expected suffixes cleared, got %d", len(ctx.Item.Suffixes))
 	}
 
-	// Rarity should be inferred from remaining mods
-	if ctx.Item.Rarity != domain.Rare { // depending on limits
+	if ctx.Item.Rarity != domain.Rare {
 		t.Fatalf("expected Rare rarity after clearing, got %s", rarityNames[ctx.Item.Rarity])
 	}
 }
