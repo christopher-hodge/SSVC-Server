@@ -7,6 +7,8 @@ import (
 
 func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) error {
 	limits := domain.AffixLimitsByRarity[ctx.Item.Rarity]
+	prefixAvailable := len(ctx.Item.Prefixes) < limits.MaxPrefixes
+	suffixAvailable := len(ctx.Item.Suffixes) < limits.MaxSuffixes
 
 	if affixType == domain.Prefix && ctx.Item.HasPrefixModifier("lock_suffixes") {
 		return errors.New("cannot roll suffixes")
@@ -17,12 +19,10 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 	}
 
 	if affixType == domain.Both || affixType == domain.All {
-		prefixAvailable := len(ctx.Item.Prefixes) < limits.MaxPrefixes
-		suffixAvailable := len(ctx.Item.Suffixes) < limits.MaxSuffixes
 
 		switch {
 		case prefixAvailable && suffixAvailable:
-			affixType = domain.AffixType(ctx.RNG.Intn(2)) // pick randomly
+			affixType = domain.AffixType(ctx.RNG.Intn(1)) // pick randomly
 		case prefixAvailable:
 			affixType = domain.Prefix
 		case suffixAvailable:

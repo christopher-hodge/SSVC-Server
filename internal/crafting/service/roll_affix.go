@@ -18,7 +18,7 @@ func RollAffix(
 			continue
 		}
 
-		if ctx.Item.ItemLevel < def.MinLevel {
+		if ctx.Item.ItemLevel <= def.MinLevel {
 			continue
 		}
 

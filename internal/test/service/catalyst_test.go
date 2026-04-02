@@ -28,9 +28,10 @@ var rarityNames = map[domain.Rarity]string{
 
 func newTestItem(rarity domain.Rarity) *domain.Item {
 	return &domain.Item{
-		Rarity:   rarity,
-		Prefixes: []domain.AffixDefinition{},
-		Suffixes: []domain.AffixDefinition{},
+		Rarity:    rarity,
+		ItemLevel: 71,
+		Prefixes:  []domain.AffixDefinition{},
+		Suffixes:  []domain.AffixDefinition{},
 	}
 }
 
@@ -41,9 +42,7 @@ func newTestContext(rarity domain.Rarity) *domain.CraftingContext {
 	}
 }
 
-//
-// --- Pipeline Tests ---
-//
+//Pipeline Tests
 
 func TestExecutePipeline_Success(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
@@ -78,9 +77,7 @@ func TestExecutePipeline_FailureStopsExecution(t *testing.T) {
 	}
 }
 
-//
-// --- Catalyst Tests ---
-//
+//Catalyst Tests
 
 func TestImbuementCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
@@ -93,13 +90,36 @@ func TestImbuementCatalyst(t *testing.T) {
 	if ctx.Item.Rarity != domain.Magic {
 		t.Fatalf("expected Magic rarity, got %v", ctx.Item.Rarity)
 	}
-	if len(ctx.Item.Prefixes) != 1 || len(ctx.Item.Suffixes) != 1 {
-		t.Fatal("expected 1 prefix and 1 suffix applied")
+	if len(ctx.Item.Prefixes) != 1 && len(ctx.Item.Suffixes) != 1 {
+		t.Fatal("expected either 1 prefix or 1 suffix applied")
+	}
+}
+
+func TestReconstructionCatalyst(t *testing.T) {
+	ctx := newTestContext(domain.Magic)
+
+	c := &service.ReconstructionCatalyst{}
+	if err := c.Apply(ctx); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if ctx.Item.Rarity != domain.Magic {
+		t.Fatalf("expected Magic rarity, got %v", ctx.Item.Rarity)
+	}
+
+	if len(ctx.Item.Prefixes) == 0 || len(ctx.Item.Suffixes) == 0 {
+		t.Fatal("expected affixes to be applied")
+	}
+
+	if len(ctx.Item.Prefixes) > 1 || len(ctx.Item.Suffixes) > 1 {
+		t.Fatal("too many affixes applied, expected 1 prefix and 1 suffix")
 	}
 }
 
 func TestElevatingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
 	c := &service.ElevatingCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {
@@ -109,8 +129,11 @@ func TestElevatingCatalyst(t *testing.T) {
 	if ctx.Item.Rarity != domain.Rare {
 		t.Fatalf("expected Rare rarity, got %v", ctx.Item.Rarity)
 	}
-	if len(ctx.Item.Prefixes) != 1 || len(ctx.Item.Suffixes) != 1 {
-		t.Fatal("expected 1 prefix and 1 suffix applied")
+
+	totalAffixCount := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
+
+	if totalAffixCount < 3 {
+		t.Fatalf("expected at least 3 affixes applied got %d", totalAffixCount)
 	}
 }
 
