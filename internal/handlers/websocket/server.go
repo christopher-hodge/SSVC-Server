@@ -100,6 +100,9 @@ func (c *WSClient) handleCraft(raw json.RawMessage) {
 	case "ascendant":
 		err = (&service.AscendantCatalyst{}).Apply(ctx, req.AffixType)
 
+	case "lustrating":
+		err = (&service.LustratingCatalyst{}).Apply(ctx, req.AffixType)
+
 	default:
 		err = errors.New("unknown catalyst")
 	}

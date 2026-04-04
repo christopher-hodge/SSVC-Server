@@ -48,9 +48,9 @@ func ClearAffixes() CraftStep {
 	}
 }
 
-func SetRarity(r domain.Rarity) CraftStep {
+func SetRarity(rarity domain.Rarity) CraftStep {
 	return func(ctx *domain.CraftingContext) error {
-		ctx.Item.Rarity = r
+		ctx.Item.Rarity = rarity
 		return nil
 	}
 }
@@ -118,6 +118,7 @@ func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 }
 
 func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext) error {
+
 	count := ctx.RNG.Intn(6) + 1
 
 	return ExecutePipeline(ctx, []CraftStep{
