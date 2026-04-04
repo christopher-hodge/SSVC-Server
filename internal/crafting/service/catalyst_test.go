@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"SSVC-Server/internal/crafting/domain"
-	"SSVC-Server/internal/crafting/service"
 	"SSVC-Server/internal/random"
 )
 
@@ -38,12 +37,12 @@ func newTestContext(rarity domain.Rarity) *domain.CraftingContext {
 func TestExecutePipeline_Success(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
 
-	steps := []service.CraftStep{
+	steps := []CraftStep{
 		func(ctx *domain.CraftingContext) error { return nil },
 		func(ctx *domain.CraftingContext) error { return nil },
 	}
 
-	if err := service.ExecutePipeline(ctx, steps); err != nil {
+	if err := ExecutePipeline(ctx, steps); err != nil {
 		t.Fatalf("expected success, got %v", err)
 	}
 }
@@ -52,7 +51,7 @@ func TestExecutePipeline_FailureStopsExecution(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
 	called := false
 
-	steps := []service.CraftStep{
+	steps := []CraftStep{
 		func(ctx *domain.CraftingContext) error { return errors.New("invalid rarity") },
 		func(ctx *domain.CraftingContext) error {
 			called = true
@@ -60,7 +59,7 @@ func TestExecutePipeline_FailureStopsExecution(t *testing.T) {
 		},
 	}
 
-	if err := service.ExecutePipeline(ctx, steps); err == nil {
+	if err := ExecutePipeline(ctx, steps); err == nil {
 		t.Fatal("expected error, got nil")
 	}
 	if called {
@@ -73,7 +72,7 @@ func TestExecutePipeline_FailureStopsExecution(t *testing.T) {
 func TestImbuementCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
 
-	c := &service.ImbuementCatalyst{}
+	c := &ImbuementCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -89,7 +88,7 @@ func TestImbuementCatalyst(t *testing.T) {
 func TestReconstructionCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
 
-	c := &service.ReconstructionCatalyst{}
+	c := &ReconstructionCatalyst{}
 	if err := c.Apply(ctx); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -112,7 +111,7 @@ func TestElevatingCatalyst(t *testing.T) {
 	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
-	c := &service.ElevatingCatalyst{}
+	c := &ElevatingCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -135,7 +134,7 @@ func TestAscendantCatalyst(t *testing.T) {
 
 	oldAffixCount := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
 
-	c := &service.AscendantCatalyst{}
+	c := &AscendantCatalyst{}
 
 	if err := c.Apply(ctx, domain.Both); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -152,7 +151,7 @@ func TestAscendantCatalyst(t *testing.T) {
 func TestDefiantCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
-	c := &service.DefiantCatalyst{}
+	c := &DefiantCatalyst{}
 	if err := c.Apply(ctx); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -180,7 +179,7 @@ func TestLustratingCatalyst(t *testing.T) {
 	ctx.Item.Prefixes = []domain.AffixDefinition{{}}
 	ctx.Item.Suffixes = []domain.AffixDefinition{{}}
 
-	c := &service.LustratingCatalyst{}
+	c := &LustratingCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -201,7 +200,7 @@ func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
-	c := &service.LustratingCatalyst{}
+	c := &LustratingCatalyst{}
 	if err := c.Apply(ctx, domain.Both); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
