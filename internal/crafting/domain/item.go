@@ -1,20 +1,12 @@
 package domain
 
 type Rarity int
-type MetaModifier int
 
 const (
 	Normal Rarity = iota
 	Magic
 	Rare
 	Unique
-)
-
-const (
-	CannotRollPrefixes MetaModifier = iota
-	CannotRollSuffixes
-	LockPrefixes
-	LockSuffixes
 )
 
 type AffixLimits struct {
