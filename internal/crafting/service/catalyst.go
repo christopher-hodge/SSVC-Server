@@ -95,7 +95,7 @@ func (c *ImbuementCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Normal),
 		SetRarity(domain.Magic),
-		AddAffixes(1, domain.Both),
+		AddAffixes(1, domain.Either),
 	})
 }
 
@@ -105,7 +105,7 @@ func (c *ReconstructionCatalyst) Apply(ctx *domain.CraftingContext) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Magic),
 		ClearAffixes(),
-		AddAffixes(count, domain.All),
+		AddAffixes(count, domain.Either),
 	})
 }
 
@@ -113,7 +113,7 @@ func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Magic),
 		SetRarity(domain.Rare),
-		AddAffixes(1, domain.Both),
+		AddAffixes(1, domain.Either),
 	})
 }
 
@@ -123,14 +123,14 @@ func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
 		ClearAffixes(),
-		AddAffixes(count, domain.All),
+		AddAffixes(count, domain.Either),
 	})
 }
 
 func (c *AscendantCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
-		AddAffixes(1, domain.Both),
+		AddAffixes(1, domain.Either),
 	})
 }
 

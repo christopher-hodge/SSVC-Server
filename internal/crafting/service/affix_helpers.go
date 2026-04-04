@@ -12,13 +12,7 @@ func resolveSelectedAffixType(
 
 	switch affixType {
 
-	case domain.Prefix, domain.OnlyPrefixes:
-		return domain.Prefix
-
-	case domain.Suffix, domain.OnlySuffixes:
-		return domain.Suffix
-
-	case domain.Both:
+	case domain.Either:
 		prefixAvailable := len(item.Prefixes) < limits.MaxPrefixes
 		suffixAvailable := len(item.Suffixes) < limits.MaxSuffixes
 

@@ -5,10 +5,7 @@ type AffixType int
 const (
 	Prefix AffixType = iota
 	Suffix
-	Both
-	OnlyPrefixes
-	OnlySuffixes
-	All
+	Either
 )
 
 type AffixDefinition struct {

@@ -73,7 +73,7 @@ func TestImbuementCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
 
 	c := &ImbuementCatalyst{}
-	if err := c.Apply(ctx, domain.Both); err != nil {
+	if err := c.Apply(ctx, domain.Either); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -112,7 +112,7 @@ func TestElevatingCatalyst(t *testing.T) {
 	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
 	c := &ElevatingCatalyst{}
-	if err := c.Apply(ctx, domain.Both); err != nil {
+	if err := c.Apply(ctx, domain.Either); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -136,7 +136,7 @@ func TestAscendantCatalyst(t *testing.T) {
 
 	c := &AscendantCatalyst{}
 
-	if err := c.Apply(ctx, domain.Both); err != nil {
+	if err := c.Apply(ctx, domain.Either); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -180,7 +180,7 @@ func TestLustratingCatalyst(t *testing.T) {
 	ctx.Item.Suffixes = []domain.AffixDefinition{{}}
 
 	c := &LustratingCatalyst{}
-	if err := c.Apply(ctx, domain.Both); err != nil {
+	if err := c.Apply(ctx, domain.Either); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -201,7 +201,7 @@ func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
 	c := &LustratingCatalyst{}
-	if err := c.Apply(ctx, domain.Both); err != nil {
+	if err := c.Apply(ctx, domain.Either); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
