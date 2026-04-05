@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"SSVC-Server/internal/game/modifier"
 	"SSVC-Server/internal/random"
 )
 
@@ -17,9 +18,9 @@ type BaseAffix struct {
 	Name       string
 	Type       AffixType
 	Tags       []string
-	ValueCount int
-	BaseMin    int
-	BaseMax    int
+	ValueCount float64
+	BaseMin    float64
+	BaseMax    float64
 	Weight     int
 	MinLevel   int
 }
@@ -29,19 +30,20 @@ type AffixDefinition struct {
 	Name            string
 	Type            AffixType
 	Tags            []string
-	MinValue        int
-	MaxValue        int
-	DisplayedValues []int
+	MinValue        float64
+	MaxValue        float64
+	DisplayedValues []float64
+	Modifiers       []modifier.Modifier
 	Weight          int
 	MinLevel        int
 	Tier            int
 }
 
-func GenerateAffix(base BaseAffix, tier int, rng random.RNGer) AffixDefinition {
+func GenerateAffix(base BaseAffix, tier int, rng random.RNGerFloat) AffixDefinition {
 	multiplier := 1 + 0.2*float64(tier-1) // +20% per tier
 
-	min := int(float64(base.BaseMin) * multiplier)
-	max := int(float64(base.BaseMax) * multiplier)
+	min := float64(base.BaseMin) * multiplier
+	max := float64(base.BaseMax) * multiplier
 
 	weight := int(float64(base.Weight) * (1 - 0.1*float64(tier-1))) // -10% per tier
 	if weight < 1 {
@@ -50,7 +52,7 @@ func GenerateAffix(base BaseAffix, tier int, rng random.RNGer) AffixDefinition {
 
 	values := rollValues(base.ValueCount, min, max, rng)
 
-	return AffixDefinition{
+	affix := AffixDefinition{
 		ID:              base.ID,
 		Name:            base.Name,
 		Type:            base.Type,
@@ -62,17 +64,23 @@ func GenerateAffix(base BaseAffix, tier int, rng random.RNGer) AffixDefinition {
 		MinLevel:        base.MinLevel,
 		Tier:            tier,
 	}
+
+	affix.Modifiers = modifier.BuildModifiers(base.ID, []float64(values))
+
+	return affix
 }
 
-func rollValues(count, min, max int, rng random.RNGer) []int {
+func rollValues(count, min, max float64, rng random.RNGerFloat) []float64 {
 	switch count {
 	case 1:
-		return []int{rng.Intn(max-min+1) + min}
+		num := max - min + 1
+		return []float64{rng.Floatn(num)}
 
 	case 2:
-		low := rng.Intn(max-min+1) + min
-		high := rng.Intn(max-low+1) + low // ensures high ≥ low
-		return []int{low, high}
+
+		low := rng.Floatn((max - min + 1) + min)
+		high := rng.Floatn((max - low + 1) + low)
+		return []float64{low, high}
 
 	default:
 		return nil

@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	"SSVC-Server/internal/game/domain"
-	"SSVC-Server/internal/random"
 )
 
 //Helpers
@@ -17,10 +17,10 @@ var rarityNames = map[domain.Rarity]string{
 }
 
 type mockRNG struct {
-	value int
+	value float64
 }
 
-func (m *mockRNG) Intn(n int) int {
+func (m *mockRNG) Floatn(n float64) float64 {
 	return m.value
 }
 
@@ -37,7 +37,7 @@ func newTestItem(rarity domain.Rarity) *domain.Item {
 func newTestContext(rarity domain.Rarity) *domain.CraftingContext {
 	return &domain.CraftingContext{
 		Item: newTestItem(rarity),
-		RNG:  &mockRNG{value: 42},
+		RNG:  &mockRNG{42},
 	}
 }
 
@@ -48,14 +48,14 @@ func TestWeightedRoll_EmptyPool(t *testing.T) {
 		}
 	}()
 
-	weightedRoll(random.New(42), []domain.BaseAffix{})
+	weightedRoll(&mockRNG{42}, []domain.BaseAffix{})
 }
 
 func TestWeightedRoll_SingleElement(t *testing.T) {
 	def := domain.BaseAffix{Weight: 10}
 
 	for i := 0; i < 100; i++ {
-		result := weightedRoll(random.New(42), []domain.BaseAffix{def})
+		result := weightedRoll(&mockRNG{42}, []domain.BaseAffix{def})
 		if result.ID != def.ID {
 			t.Fatalf("expected %v, got %v", def, result)
 		}
@@ -71,7 +71,7 @@ func TestWeightedRoll_Bias(t *testing.T) {
 	counts := make(map[int]int)
 
 	for i := 0; i < 10000; i++ {
-		result := weightedRoll(random.New(42), pool)
+		result := weightedRoll(&mockRNG{42}, pool)
 		counts[result.Weight]++
 	}
 
@@ -158,10 +158,10 @@ func TestRemoveIntegrity(t *testing.T) {
 				Item: &domain.Item{
 					Integrity: tc.startIntegrity,
 				},
-				RNG: &mockRNG{value: tc.mockRoll},
+				RNG: &mockRNG{float64(tc.mockRoll)},
 			}
 
-			step := RemoveIntegrity(tc.subtractRange)
+			step := RemoveIntegrity(int(math.Round(float64(tc.subtractRange))))
 			err := step(ctx)
 
 			if tc.expectError {
@@ -243,7 +243,7 @@ func TestImbuementCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Normal)
 
 	c := &ImbuementCatalyst{}
-	if err := c.Apply(ctx, domain.Either); err != nil {
+	if err := c.Apply(ctx, domain.Either, &mockRNG{42}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -260,7 +260,7 @@ func TestReconstructingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
 
 	c := &ReconstructingCatalyst{}
-	if err := c.Apply(ctx); err != nil {
+	if err := c.Apply(ctx, &mockRNG{42}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -279,11 +279,11 @@ func TestReconstructingCatalyst(t *testing.T) {
 
 func TestElevatingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
-	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
-	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}}
 
 	c := &ElevatingCatalyst{}
-	if err := c.Apply(ctx, domain.Either); err != nil {
+	if err := c.Apply(ctx, domain.Either, &mockRNG{42}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -306,14 +306,14 @@ func TestAscendantCatalyst(t *testing.T) {
 		domain.AffixDefinition{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, Weight: 100, MinLevel: 1},
 	)
 
-	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
-	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}}
 
 	oldAffixCount := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
 
 	c := &AscendantCatalyst{}
 
-	if err := c.Apply(ctx, domain.Either); err != nil {
+	if err := c.Apply(ctx, domain.Either, &mockRNG{42}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -332,7 +332,7 @@ func TestDefiantCatalyst(t *testing.T) {
 	ctx.Item.Suffixes = []domain.AffixDefinition{}
 
 	c := &DefiantCatalyst{}
-	if err := c.Apply(ctx); err != nil {
+	if err := c.Apply(ctx, &mockRNG{42}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -377,8 +377,8 @@ func TestLustratingCatalyst(t *testing.T) {
 func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
-	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
-	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValues: []float64{1}, Weight: 100, MinLevel: 1}}
 
 	c := &LustratingCatalyst{}
 	if err := c.Apply(ctx, domain.Either); err != nil {
@@ -404,7 +404,7 @@ func TestCatharticCatalyst_Apply(t *testing.T) {
 
 	c := &CatharticCatalyst{}
 
-	if err := c.Apply(ctx); err != nil {
+	if err := c.Apply(ctx, &mockRNG{42}); err != nil {
 		t.Fatalf("Apply returned error: %v", err)
 	}
 
@@ -435,7 +435,7 @@ func TestCatharticCatalyst_Apply_WithLockedMods(t *testing.T) {
 			Tags:            []string{"test"},
 			MinValue:        1,
 			MaxValue:        1,
-			DisplayedValues: []int{1},
+			DisplayedValues: []float64{1},
 			Weight:          100,
 			MinLevel:        1,
 		},
@@ -446,7 +446,7 @@ func TestCatharticCatalyst_Apply_WithLockedMods(t *testing.T) {
 			Tags:            []string{"test"},
 			MinValue:        1,
 			MaxValue:        1,
-			DisplayedValues: []int{1},
+			DisplayedValues: []float64{1},
 			Weight:          100,
 			MinLevel:        1,
 		},
@@ -459,7 +459,7 @@ func TestCatharticCatalyst_Apply_WithLockedMods(t *testing.T) {
 			Tags:            []string{"lock_prefixes"},
 			MinValue:        1,
 			MaxValue:        1,
-			DisplayedValues: []int{1},
+			DisplayedValues: []float64{1},
 			Weight:          100,
 			MinLevel:        1,
 		},
@@ -467,7 +467,7 @@ func TestCatharticCatalyst_Apply_WithLockedMods(t *testing.T) {
 
 	c := &CatharticCatalyst{}
 
-	if err := c.Apply(ctx); err != nil {
+	if err := c.Apply(ctx, &mockRNG{42}); err != nil {
 		t.Fatalf("Apply returned error: %v", err)
 	}
 

@@ -6,7 +6,7 @@ import (
 
 type CraftingContext struct {
 	Item *Item
-	RNG  random.RNGer
+	RNG  random.RNGerFloat
 }
 
 type Currency interface {

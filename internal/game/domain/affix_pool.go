@@ -67,7 +67,7 @@ var BaseAffixes = []BaseAffix{
 
 var AffixPool = []AffixDefinition{}
 
-func InitAffixPool(rng random.RNGer) {
+func InitAffixPool(rng random.RNGerFloat) {
 	tierCount := 10
 	for _, base := range BaseAffixes {
 		for tier := 1; tier <= tierCount; tier++ {

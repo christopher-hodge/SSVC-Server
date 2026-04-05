@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
+	"math"
 
 	"SSVC-Server/internal/game/domain"
+	"SSVC-Server/internal/random"
 )
 
 // Base Catalyst Structs
@@ -90,9 +92,9 @@ func RemoveIntegrity(subtractRange int) CraftStep {
 			return errors.New("No integrity to remove.")
 		}
 
-		amount := ctx.RNG.Intn(subtractRange) + 1
+		amount := ctx.RNG.Floatn(math.Round(float64(subtractRange))) + 1
 
-		ctx.Item.Integrity -= amount
+		ctx.Item.Integrity -= int(amount)
 
 		if ctx.Item.Integrity < 0 {
 			ctx.Item.Integrity = 0
@@ -119,10 +121,10 @@ func AddIntegrity(sumAmmount int) CraftStep {
 	}
 }
 
-func AddAffixes(count int, affixType domain.AffixType) CraftStep {
+func AddAffixes(count int, affixType domain.AffixType, rng random.RNGerFloat) CraftStep {
 	return func(ctx *domain.CraftingContext) error {
 		for i := 0; i < count; i++ {
-			if err := ApplyAffixLogic(ctx, affixType); err != nil {
+			if err := ApplyAffixLogic(ctx, affixType, rng); err != nil {
 				break
 			}
 		}
@@ -132,52 +134,52 @@ func AddAffixes(count int, affixType domain.AffixType) CraftStep {
 
 //Base Crafting item functions
 
-func (c *ImbuementCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
+func (c *ImbuementCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType, rng random.RNGerFloat) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Normal),
 		SetRarity(domain.Magic),
 		RemoveIntegrity(5),
-		AddAffixes(1, domain.Either),
+		AddAffixes(1, domain.Either, rng),
 	})
 }
 
-func (c *ReconstructingCatalyst) Apply(ctx *domain.CraftingContext) error {
-	count := ctx.RNG.Intn(2) + 1
+func (c *ReconstructingCatalyst) Apply(ctx *domain.CraftingContext, rng random.RNGerFloat) error {
+	count := ctx.RNG.Floatn(math.Round(2)) + 1
 
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Magic),
 		ClearAffixes(),
 		RemoveIntegrity(5),
-		AddAffixes(count, domain.Either),
+		AddAffixes(int(count), domain.Either, rng),
 	})
 }
 
-func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
+func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType, rng random.RNGerFloat) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Magic),
 		SetRarity(domain.Rare),
 		RemoveIntegrity(10),
-		AddAffixes(1, domain.Either),
+		AddAffixes(1, domain.Either, rng),
 	})
 }
 
-func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext) error {
+func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext, rng random.RNGerFloat) error {
 
-	count := ctx.RNG.Intn(4) + 3 // Rares require at least 3 mods
+	count := ctx.RNG.Floatn(math.Round(4)) + 3 // Rares require at least 3 mods
 
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
 		ClearAffixes(),
 		RemoveIntegrity(15),
-		AddAffixes(count, domain.Either),
+		AddAffixes(int(count), domain.Either, rng),
 	})
 }
 
-func (c *AscendantCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType) error {
+func (c *AscendantCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.AffixType, rng random.RNGerFloat) error {
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
 		RemoveIntegrity(15),
-		AddAffixes(1, domain.Either),
+		AddAffixes(1, domain.Either, rng),
 	})
 }
 
@@ -192,14 +194,14 @@ func (c *LustratingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain
 
 //Special Catalyst Crafting functions
 
-func (c *CatharticCatalyst) Apply(ctx *domain.CraftingContext) error {
+func (c *CatharticCatalyst) Apply(ctx *domain.CraftingContext, rng random.RNGerFloat) error {
 
-	count := ctx.RNG.Intn(7)
+	count := ctx.RNG.Floatn(math.Round(7))
 
 	return ExecutePipeline(ctx, []CraftStep{
 		ClearAffixes(),
 		RemoveIntegrity(10),
-		AddAffixes(count, domain.Either),
+		AddAffixes(int(count), domain.Either, rng),
 		func(ctx *domain.CraftingContext) error {
 			ctx.Item.Rarity = InferRarityFromAffixes(ctx.Item)
 			return nil

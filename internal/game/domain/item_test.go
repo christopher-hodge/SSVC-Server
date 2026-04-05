@@ -6,10 +6,10 @@ import (
 )
 
 type mockRNG struct {
-	value int
+	value float64
 }
 
-func (m *mockRNG) Intn(n int) int {
+func (m *mockRNG) Floatn(n float64) float64 {
 	return m.value
 }
 

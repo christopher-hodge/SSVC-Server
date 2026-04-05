@@ -1,4 +1,6 @@
-package player
+package modifier
+
+type StatType int
 
 const (
 	StatLife StatType = iota
@@ -10,7 +12,7 @@ const (
 
 type Modifier struct {
 	Type  StatType
-	Value float32
+	Value []float64
 	Op    ModifierOp
 }
 

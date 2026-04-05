@@ -4,9 +4,10 @@ import (
 	"SSVC-Server/internal/game/domain"
 	"SSVC-Server/internal/random"
 	"errors"
+	"math"
 )
 
-func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) error {
+func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType, rng random.RNGerFloat) error {
 
 	limits := domain.AffixLimitsByRarity[ctx.Item.Rarity]
 	prefixAvailable := len(ctx.Item.Prefixes) < limits.MaxPrefixes
@@ -17,7 +18,7 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 		switch {
 		case prefixAvailable && suffixAvailable:
 			affixType = domain.Prefix
-			if ctx.RNG.Intn(2) == 1 {
+			if ctx.RNG.Floatn(math.Round(2)) == 1 {
 				affixType = domain.Suffix
 			}
 		case prefixAvailable:
@@ -36,7 +37,7 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 		return errors.New("max suffixes reached")
 	}
 
-	affix, err := RollAffix(ctx, ctx.RNG, affixType)
+	affix, err := RollAffix(ctx, rng, affixType)
 	if err != nil {
 		return err
 	}
@@ -52,7 +53,7 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 
 func RollAffix(
 	ctx *domain.CraftingContext,
-	rng random.RNGer,
+	rng random.RNGerFloat,
 	affixType domain.AffixType,
 ) (domain.AffixDefinition, error) {
 
@@ -89,18 +90,18 @@ func RollAffix(
 func rollTier(
 	ctx *domain.CraftingContext,
 	base domain.BaseAffix,
-	rng random.RNGer,
+	rng random.RNGerFloat,
 ) int {
 
 	maxTier := 10
 
-	tier := rng.Intn(maxTier) + 1
+	tier := rng.Floatn(float64(maxTier)) + 1
 
-	return tier
+	return int(tier)
 }
 
 func weightedRoll(
-	rng random.RNGer,
+	rng random.RNGerFloat,
 	pool []domain.BaseAffix,
 ) domain.BaseAffix {
 
@@ -109,12 +110,12 @@ func weightedRoll(
 		totalWeight += def.Weight
 	}
 
-	roll := rng.Intn(totalWeight)
+	roll := rng.Floatn(float64(totalWeight))
 
 	running := 0
 	for _, def := range pool {
 		running += def.Weight
-		if roll < running {
+		if roll < float64(running) {
 			return def
 		}
 	}
