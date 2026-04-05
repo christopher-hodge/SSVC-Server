@@ -1,5 +1,7 @@
 package domain
 
+import "SSVC-Server/internal/random"
+
 var BaseAffixes = []BaseAffix{
 	{
 		ID:       "life_flat",
@@ -23,7 +25,7 @@ var BaseAffixes = []BaseAffix{
 	},
 	{
 		ID:       "ego_flat",
-		Name:     "Mage's",
+		Name:     "Sinborn's",
 		Type:     Prefix,
 		Tags:     []string{"ego"},
 		BaseMin:  5,
@@ -65,11 +67,11 @@ var BaseAffixes = []BaseAffix{
 
 var AffixPool = []AffixDefinition{}
 
-func InitAffixPool() {
+func InitAffixPool(rng random.RNGer) {
 	tierCount := 10
 	for _, base := range BaseAffixes {
 		for tier := 1; tier <= tierCount; tier++ {
-			affix := GenerateAffix(base, tier)
+			affix := GenerateAffix(base, tier, rng)
 			AffixPool = append(AffixPool, affix)
 		}
 	}

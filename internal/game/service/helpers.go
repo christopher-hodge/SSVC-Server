@@ -1,7 +1,7 @@
 package service
 
 import (
-	"SSVC-Server/internal/crafting/domain"
+	"SSVC-Server/internal/game/domain"
 	"SSVC-Server/internal/random"
 	"errors"
 )
@@ -56,45 +56,53 @@ func RollAffix(
 	affixType domain.AffixType,
 ) (domain.AffixDefinition, error) {
 
-	validAffixes := make([]domain.AffixDefinition, 0)
+	validAffixes := make([]domain.BaseAffix, 0)
 
-	for _, def := range domain.AffixPool {
-		if def.Type != affixType {
+	for _, base := range domain.BaseAffixes {
+		if base.Type != affixType {
 			continue
 		}
 
-		if ctx.Item.ItemLevel < def.MinLevel {
+		if ctx.Item.ItemLevel < base.MinLevel {
 			continue
 		}
 
-		validAffixes = append(validAffixes, def)
+		validAffixes = append(validAffixes, base)
 	}
 
 	if len(validAffixes) == 0 {
-		return domain.AffixDefinition{}, errors.New("No valid affixes")
+		return domain.AffixDefinition{}, errors.New("no valid affixes")
 	}
 
-	chosenAffix := weightedRoll(rng, validAffixes)
+	// 1️⃣ pick base affix
+	chosenBase := weightedRoll(rng, validAffixes)
 
-	value := ctx.RNG.Intn(chosenAffix.MaxValue-chosenAffix.MinValue+1) + chosenAffix.MinValue
+	// 2️⃣ roll tier (you can improve this later)
+	tier := rollTier(ctx, chosenBase, rng)
 
-	return domain.AffixDefinition{
-		ID:             chosenAffix.ID,
-		Name:           chosenAffix.Name,
-		Type:           chosenAffix.Type,
-		Tags:           chosenAffix.Tags,
-		MinValue:       chosenAffix.MinValue,
-		MaxValue:       chosenAffix.MaxValue,
-		DisplayedValue: value,
-		Weight:         chosenAffix.Weight,
-		MinLevel:       chosenAffix.MinLevel,
-	}, nil
+	// 3️⃣ generate full affix (handles scaling + values)
+	affix := domain.GenerateAffix(chosenBase, tier, rng)
+
+	return affix, nil
+}
+
+func rollTier(
+	ctx *domain.CraftingContext,
+	base domain.BaseAffix,
+	rng random.RNGer,
+) int {
+
+	maxTier := 10
+
+	tier := rng.Intn(maxTier) + 1
+
+	return tier
 }
 
 func weightedRoll(
 	rng random.RNGer,
-	pool []domain.AffixDefinition,
-) domain.AffixDefinition {
+	pool []domain.BaseAffix,
+) domain.BaseAffix {
 
 	totalWeight := 0
 	for _, def := range pool {

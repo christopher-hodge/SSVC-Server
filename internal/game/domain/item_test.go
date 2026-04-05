@@ -5,6 +5,14 @@ import (
 	"testing"
 )
 
+type mockRNG struct {
+	value int
+}
+
+func (m *mockRNG) Intn(n int) int {
+	return m.value
+}
+
 func TestHasPrefixModifier(t *testing.T) {
 	item := Item{
 		Prefixes: []AffixDefinition{
@@ -30,7 +38,7 @@ func TestHasSuffixModifier(t *testing.T) {
 }
 
 func TestGenerateAffixPool(t *testing.T) {
-	InitAffixPool() // populate AffixPool
+	InitAffixPool(&mockRNG{42})
 
 	if len(AffixPool) == 0 {
 		t.Fatal("AffixPool is empty, affixes not generated")

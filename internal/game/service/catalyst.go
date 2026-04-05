@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"SSVC-Server/internal/crafting/domain"
+	"SSVC-Server/internal/game/domain"
 )
 
 // Base Catalyst Structs

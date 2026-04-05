@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"SSVC-Server/internal/crafting/domain"
+	"SSVC-Server/internal/game/domain"
 	"SSVC-Server/internal/random"
 )
 
@@ -48,14 +48,14 @@ func TestWeightedRoll_EmptyPool(t *testing.T) {
 		}
 	}()
 
-	weightedRoll(random.New(42), []domain.AffixDefinition{})
+	weightedRoll(random.New(42), []domain.BaseAffix{})
 }
 
 func TestWeightedRoll_SingleElement(t *testing.T) {
-	def := domain.AffixDefinition{Weight: 10}
+	def := domain.BaseAffix{Weight: 10}
 
 	for i := 0; i < 100; i++ {
-		result := weightedRoll(random.New(42), []domain.AffixDefinition{def})
+		result := weightedRoll(random.New(42), []domain.BaseAffix{def})
 		if result.ID != def.ID {
 			t.Fatalf("expected %v, got %v", def, result)
 		}
@@ -63,7 +63,7 @@ func TestWeightedRoll_SingleElement(t *testing.T) {
 }
 
 func TestWeightedRoll_Bias(t *testing.T) {
-	pool := []domain.AffixDefinition{
+	pool := []domain.BaseAffix{
 		{Weight: 1}, // rare
 		{Weight: 9}, // common
 	}
@@ -279,8 +279,8 @@ func TestReconstructingCatalyst(t *testing.T) {
 
 func TestElevatingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
-	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
-	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
 
 	c := &ElevatingCatalyst{}
 	if err := c.Apply(ctx, domain.Either); err != nil {
@@ -306,8 +306,8 @@ func TestAscendantCatalyst(t *testing.T) {
 		domain.AffixDefinition{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, Weight: 100, MinLevel: 1},
 	)
 
-	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
-	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
 
 	oldAffixCount := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
 
@@ -377,8 +377,8 @@ func TestLustratingCatalyst(t *testing.T) {
 func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
-	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
-	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
+	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test", Name: "Test", Type: domain.Prefix, Tags: []string{"test"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}, {ID: "test2", Name: "Test2", Type: domain.Suffix, Tags: []string{"test2"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
+	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "lock_prefixes", Name: "lock_prefixes", Type: domain.Suffix, Tags: []string{"lock_prefixes"}, MinValue: 1, MaxValue: 1, DisplayedValues: []int{1}, Weight: 100, MinLevel: 1}}
 
 	c := &LustratingCatalyst{}
 	if err := c.Apply(ctx, domain.Either); err != nil {
@@ -429,39 +429,39 @@ func TestCatharticCatalyst_Apply_WithLockedMods(t *testing.T) {
 
 	ctx.Item.Prefixes = []domain.AffixDefinition{
 		{
-			ID:             "test_prefix",
-			Name:           "Test Prefix",
-			Type:           domain.Prefix,
-			Tags:           []string{"test"},
-			MinValue:       1,
-			MaxValue:       1,
-			DisplayedValue: 1,
-			Weight:         100,
-			MinLevel:       1,
+			ID:              "test_prefix",
+			Name:            "Test Prefix",
+			Type:            domain.Prefix,
+			Tags:            []string{"test"},
+			MinValue:        1,
+			MaxValue:        1,
+			DisplayedValues: []int{1},
+			Weight:          100,
+			MinLevel:        1,
 		},
 		{
-			ID:             "test_prefix_2",
-			Name:           "Test Prefix 2",
-			Type:           domain.Prefix,
-			Tags:           []string{"test"},
-			MinValue:       1,
-			MaxValue:       1,
-			DisplayedValue: 1,
-			Weight:         100,
-			MinLevel:       1,
+			ID:              "test_prefix_2",
+			Name:            "Test Prefix 2",
+			Type:            domain.Prefix,
+			Tags:            []string{"test"},
+			MinValue:        1,
+			MaxValue:        1,
+			DisplayedValues: []int{1},
+			Weight:          100,
+			MinLevel:        1,
 		},
 	}
 	ctx.Item.Suffixes = []domain.AffixDefinition{
 		{
-			ID:             "lock_prefixes",
-			Name:           "Lock Prefixes",
-			Type:           domain.Suffix,
-			Tags:           []string{"lock_prefixes"},
-			MinValue:       1,
-			MaxValue:       1,
-			DisplayedValue: 1,
-			Weight:         100,
-			MinLevel:       1,
+			ID:              "lock_prefixes",
+			Name:            "Lock Prefixes",
+			Type:            domain.Suffix,
+			Tags:            []string{"lock_prefixes"},
+			MinValue:        1,
+			MaxValue:        1,
+			DisplayedValues: []int{1},
+			Weight:          100,
+			MinLevel:        1,
 		},
 	}
 
