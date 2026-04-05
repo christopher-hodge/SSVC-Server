@@ -3,14 +3,12 @@ package service
 import (
 	"SSVC-Server/internal/crafting/domain"
 	"SSVC-Server/internal/random"
-	"time"
 )
 
 func weightedRoll(
+	rng *random.RNG,
 	pool []domain.AffixDefinition,
 ) domain.AffixDefinition {
-
-	rng := random.New(time.Now().UnixNano())
 
 	totalWeight := 0
 	for _, def := range pool {

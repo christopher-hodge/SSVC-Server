@@ -77,7 +77,7 @@ func RollAffix(
 		return domain.AffixDefinition{}, errors.New("No valid affixes")
 	}
 
-	chosenAffix := weightedRoll(validAffixes)
+	chosenAffix := weightedRoll(&ctx.RNG, validAffixes)
 
 	value := ctx.RNG.Intn(chosenAffix.MaxValue-chosenAffix.MinValue+1) + chosenAffix.MinValue
 

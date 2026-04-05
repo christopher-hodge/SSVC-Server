@@ -33,6 +33,45 @@ func newTestContext(rarity domain.Rarity) *domain.CraftingContext {
 	}
 }
 
+func TestWeightedRoll_EmptyPool(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("expected panic on empty pool")
+		}
+	}()
+
+	weightedRoll(random.New(42), []domain.AffixDefinition{})
+}
+
+func TestWeightedRoll_SingleElement(t *testing.T) {
+	def := domain.AffixDefinition{Weight: 10}
+
+	for i := 0; i < 100; i++ {
+		result := weightedRoll(random.New(42), []domain.AffixDefinition{def})
+		if result.ID != def.ID {
+			t.Fatalf("expected %v, got %v", def, result)
+		}
+	}
+}
+
+func TestWeightedRoll_Bias(t *testing.T) {
+	pool := []domain.AffixDefinition{
+		{Weight: 1}, // rare
+		{Weight: 9}, // common
+	}
+
+	counts := make(map[int]int)
+
+	for i := 0; i < 10000; i++ {
+		result := weightedRoll(random.New(42), pool)
+		counts[result.Weight]++
+	}
+
+	if counts[9] <= counts[1] {
+		t.Fatalf("expected higher weight to be rolled more often: %+v", counts)
+	}
+}
+
 //Pipeline Tests
 
 func TestExecutePipeline_Success(t *testing.T) {
