@@ -20,6 +20,7 @@ func newTestItem(rarity domain.Rarity) *domain.Item {
 	return &domain.Item{
 		Rarity:    rarity,
 		ItemLevel: 71,
+		Integrity: 100,
 		Prefixes:  []domain.AffixDefinition{},
 		Suffixes:  []domain.AffixDefinition{},
 	}
@@ -80,6 +81,7 @@ func TestImbuementCatalyst(t *testing.T) {
 	if ctx.Item.Rarity != domain.Magic {
 		t.Fatalf("expected Magic rarity, got %v", ctx.Item.Rarity)
 	}
+
 	if len(ctx.Item.Prefixes)+len(ctx.Item.Suffixes) != 1 {
 		t.Fatal("expected either 1 prefix or 1 suffix applied")
 	}
@@ -88,7 +90,7 @@ func TestImbuementCatalyst(t *testing.T) {
 func TestReconstructionCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
 
-	c := &ReconstructionCatalyst{}
+	c := &ReconstructingCatalyst{}
 	if err := c.Apply(ctx); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

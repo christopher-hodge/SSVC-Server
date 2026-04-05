@@ -89,7 +89,7 @@ func (c *WSClient) handleCraft(raw json.RawMessage) {
 		err = (&service.ImbuementCatalyst{}).Apply(ctx, req.AffixType)
 
 	case "reconstruction":
-		err = (&service.ReconstructionCatalyst{}).Apply(ctx)
+		err = (&service.ReconstructingCatalyst{}).Apply(ctx)
 
 	case "elevating":
 		err = (&service.ElevatingCatalyst{}).Apply(ctx, req.AffixType)

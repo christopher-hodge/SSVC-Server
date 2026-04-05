@@ -40,6 +40,7 @@ type Item struct {
 	ID        string
 	BaseType  string
 	Rarity    Rarity
+	Integrity int
 	ItemLevel int
 	Prefixes  []AffixDefinition
 	Suffixes  []AffixDefinition
