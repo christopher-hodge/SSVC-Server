@@ -397,3 +397,29 @@ func TestLustratingCatalyst_WithLockedMods(t *testing.T) {
 		t.Fatalf("expected Rare rarity after clearing, got %s", rarityNames[ctx.Item.Rarity])
 	}
 }
+
+func TestCatharticCatalyst_Apply(t *testing.T) {
+
+	ctx := newTestContext(domain.Rare)
+
+	c := &CatharticCatalyst{}
+
+	if err := c.Apply(ctx); err != nil {
+		t.Fatalf("Apply returned error: %v", err)
+	}
+
+	if ctx.Item.Integrity > 60 || ctx.Item.Integrity < 50 {
+		t.Errorf("Integrity after Apply = %d, want between 50 and 60", ctx.Item.Integrity)
+	}
+
+	totalAffixes := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
+	if totalAffixes < 1 || totalAffixes > 6 {
+		t.Errorf("Total affixes after Apply = %d, want between 1 and 6", totalAffixes)
+	}
+
+	expectedRarity := InferRarityFromAffixes(ctx.Item)
+
+	if ctx.Item.Rarity != expectedRarity {
+		t.Errorf("Rarity after Apply = %v, want %v", rarityNames[ctx.Item.Rarity], rarityNames[expectedRarity])
+	}
+}

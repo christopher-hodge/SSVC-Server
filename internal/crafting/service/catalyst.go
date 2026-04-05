@@ -68,6 +68,7 @@ func InferRarityFromAffixes(item *domain.Item) domain.Rarity {
 	}
 
 	magic := domain.AffixLimitsByRarity[domain.Magic]
+
 	if prefixCount <= magic.MaxPrefixes && suffixCount <= magic.MaxSuffixes {
 		return domain.Magic
 	}
@@ -193,13 +194,16 @@ func (c *LustratingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain
 
 func (c *CatharticCatalyst) Apply(ctx *domain.CraftingContext) error {
 
-	count := ctx.RNG.Intn(6) + 1
+	count := ctx.RNG.Intn(7)
 
 	return ExecutePipeline(ctx, []CraftStep{
 		ClearAffixes(),
 		RemoveIntegrity(10),
 		AddAffixes(count, domain.Either),
-		SetRarity(InferRarityFromAffixes(ctx.Item)),
+		func(ctx *domain.CraftingContext) error {
+			ctx.Item.Rarity = InferRarityFromAffixes(ctx.Item)
+			return nil
+		},
 	})
 
 }
