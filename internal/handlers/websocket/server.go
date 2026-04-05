@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/websocket"
 
@@ -22,7 +21,7 @@ var upgrader = websocket.Upgrader{
 
 type WSClient struct {
 	Conn *websocket.Conn
-	RNG  *random.RNG
+	RNG  *random.RNGer
 }
 
 type CraftRequest struct {
@@ -45,7 +44,7 @@ func ServeWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	client := &WSClient{
 		Conn: conn,
-		RNG:  random.New(time.Now().UnixNano()), // deterministic seed for now
+		RNG:  new(random.RNGer),
 	}
 
 	for {
@@ -79,8 +78,8 @@ func (c *WSClient) handleCraft(raw json.RawMessage) {
 	}
 
 	ctx := &domain.CraftingContext{
-		Item: &domain.Item{Rarity: domain.Normal},
-		RNG:  c.RNG,
+		Item: &domain.Item{},
+		RNG:  *c.RNG,
 	}
 
 	var err error
@@ -102,6 +101,9 @@ func (c *WSClient) handleCraft(raw json.RawMessage) {
 
 	case "lustrating":
 		err = (&service.LustratingCatalyst{}).Apply(ctx, req.AffixType)
+
+	case "cathartic":
+		err = (&service.CatharticCatalyst{}).Apply(ctx)
 
 	default:
 		err = errors.New("unknown catalyst")

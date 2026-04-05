@@ -15,7 +15,7 @@ type AscendantCatalyst struct{}
 type LustratingCatalyst struct{}
 
 // Special Catalyst Structs
-type CatharsisCatalyst struct{}
+type CatharticCatalyst struct{}
 
 type CraftStep func(ctx *domain.CraftingContext) error
 
@@ -191,7 +191,7 @@ func (c *LustratingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain
 
 //Special Catalyst Crafting functions
 
-func (c *CatharsisCatalyst) Apply(ctx *domain.CraftingContext) error {
+func (c *CatharticCatalyst) Apply(ctx *domain.CraftingContext) error {
 
 	count := ctx.RNG.Intn(6) + 1
 
