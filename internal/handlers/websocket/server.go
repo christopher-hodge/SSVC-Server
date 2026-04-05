@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"SSVC-Server/internal/crafting/domain"
-	"SSVC-Server/internal/crafting/service"
+	"SSVC-Server/internal/game/domain"
+	"SSVC-Server/internal/game/service"
 	"SSVC-Server/internal/random"
 )
 
