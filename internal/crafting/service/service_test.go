@@ -256,7 +256,7 @@ func TestImbuementCatalyst(t *testing.T) {
 	}
 }
 
-func TestReconstructionCatalyst(t *testing.T) {
+func TestReconstructingCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Magic)
 
 	c := &ReconstructingCatalyst{}
