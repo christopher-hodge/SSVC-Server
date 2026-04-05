@@ -21,7 +21,7 @@ var upgrader = websocket.Upgrader{
 
 type WSClient struct {
 	Conn *websocket.Conn
-	RNG  *random.RNGer
+	RNG  *random.RNGerFloat
 }
 
 type CraftRequest struct {
@@ -44,7 +44,7 @@ func ServeWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	client := &WSClient{
 		Conn: conn,
-		RNG:  new(random.RNGer),
+		RNG:  new(random.RNGerFloat),
 	}
 
 	for {
@@ -85,25 +85,25 @@ func (c *WSClient) handleCraft(raw json.RawMessage) {
 	var err error
 	switch req.Catalyst {
 	case "imbuement":
-		err = (&service.ImbuementCatalyst{}).Apply(ctx, req.AffixType)
+		err = (&service.ImbuementCatalyst{}).Apply(ctx, req.AffixType, ctx.RNG)
 
 	case "reconstruction":
-		err = (&service.ReconstructingCatalyst{}).Apply(ctx)
+		err = (&service.ReconstructingCatalyst{}).Apply(ctx, ctx.RNG)
 
 	case "elevating":
-		err = (&service.ElevatingCatalyst{}).Apply(ctx, req.AffixType)
+		err = (&service.ElevatingCatalyst{}).Apply(ctx, req.AffixType, ctx.RNG)
 
 	case "defiant":
-		err = (&service.DefiantCatalyst{}).Apply(ctx)
+		err = (&service.DefiantCatalyst{}).Apply(ctx, ctx.RNG)
 
 	case "ascendant":
-		err = (&service.AscendantCatalyst{}).Apply(ctx, req.AffixType)
+		err = (&service.AscendantCatalyst{}).Apply(ctx, req.AffixType, ctx.RNG)
 
 	case "lustrating":
 		err = (&service.LustratingCatalyst{}).Apply(ctx, req.AffixType)
 
 	case "cathartic":
-		err = (&service.CatharticCatalyst{}).Apply(ctx)
+		err = (&service.CatharticCatalyst{}).Apply(ctx, ctx.RNG)
 
 	default:
 		err = errors.New("unknown catalyst")

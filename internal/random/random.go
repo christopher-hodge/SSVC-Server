@@ -13,10 +13,6 @@ type RNGerFloat interface {
 	Floatn(n float64) float64
 }
 
-func (r RNGerFloat) Intn(totalWeight int) any {
-	panic("unimplemented")
-}
-
 type RNG struct {
 	r    *rand.Rand
 	seed int64
