@@ -2,6 +2,7 @@ package service
 
 import (
 	"SSVC-Server/internal/crafting/domain"
+	"SSVC-Server/internal/random"
 	"errors"
 )
 
@@ -40,7 +41,7 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 		return errors.New("max suffixes reached")
 	}
 
-	affix, err := RollAffix(ctx, affixType)
+	affix, err := RollAffix(ctx, ctx.RNG, affixType)
 	if err != nil {
 		return err
 	}
@@ -56,6 +57,7 @@ func ApplyAffixLogic(ctx *domain.CraftingContext, affixType domain.AffixType) er
 
 func RollAffix(
 	ctx *domain.CraftingContext,
+	rng random.RNGer,
 	affixType domain.AffixType,
 ) (domain.AffixDefinition, error) {
 
@@ -77,7 +79,7 @@ func RollAffix(
 		return domain.AffixDefinition{}, errors.New("No valid affixes")
 	}
 
-	chosenAffix := weightedRoll(&ctx.RNG, validAffixes)
+	chosenAffix := weightedRoll(rng, validAffixes)
 
 	value := ctx.RNG.Intn(chosenAffix.MaxValue-chosenAffix.MinValue+1) + chosenAffix.MinValue
 

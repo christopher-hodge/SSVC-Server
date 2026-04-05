@@ -16,6 +16,14 @@ var rarityNames = map[domain.Rarity]string{
 	domain.Rare:   "Rare",
 }
 
+type mockRNG struct {
+	value int
+}
+
+func (m *mockRNG) Intn(n int) int {
+	return m.value
+}
+
 func newTestItem(rarity domain.Rarity) *domain.Item {
 	return &domain.Item{
 		Rarity:    rarity,
@@ -29,7 +37,7 @@ func newTestItem(rarity domain.Rarity) *domain.Item {
 func newTestContext(rarity domain.Rarity) *domain.CraftingContext {
 	return &domain.CraftingContext{
 		Item: newTestItem(rarity),
-		RNG:  *random.New(42),
+		RNG:  &mockRNG{value: 42},
 	}
 }
 
@@ -104,6 +112,77 @@ func TestExecutePipeline_FailureStopsExecution(t *testing.T) {
 	}
 	if called {
 		t.Fatal("expected pipeline to stop on error")
+	}
+}
+
+func TestRemoveIntegrity(t *testing.T) {
+	type testCase struct {
+		name           string
+		startIntegrity int
+		subtractRange  int
+		mockRoll       int
+		expected       int
+		expectError    bool
+	}
+
+	tests := []testCase{
+		{
+			name:           "normal reduction",
+			startIntegrity: 10,
+			subtractRange:  5,
+			mockRoll:       2, // +1 = 3 removed
+			expected:       7,
+			expectError:    false,
+		},
+		{
+			name:           "clamps to zero",
+			startIntegrity: 1,
+			subtractRange:  5,
+			mockRoll:       4, // +1 = 5 removed
+			expected:       0,
+			expectError:    false,
+		},
+		{
+			name:           "no integrity to remove",
+			startIntegrity: 0,
+			subtractRange:  5,
+			mockRoll:       0,
+			expected:       0,
+			expectError:    true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := &domain.CraftingContext{
+				Item: &domain.Item{
+					Integrity: tc.startIntegrity,
+				},
+				RNG: &mockRNG{value: tc.mockRoll},
+			}
+
+			step := RemoveIntegrity(tc.subtractRange)
+			err := step(ctx)
+
+			if tc.expectError {
+				if err == nil {
+					t.Fatalf("expected error, got nil")
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if ctx.Item.Integrity != tc.expected {
+				t.Fatalf(
+					"expected integrity %d, got %d",
+					tc.expected,
+					ctx.Item.Integrity,
+				)
+			}
+		})
 	}
 }
 

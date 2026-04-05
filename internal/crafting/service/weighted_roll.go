@@ -6,7 +6,7 @@ import (
 )
 
 func weightedRoll(
-	rng *random.RNG,
+	rng random.RNGer,
 	pool []domain.AffixDefinition,
 ) domain.AffixDefinition {
 

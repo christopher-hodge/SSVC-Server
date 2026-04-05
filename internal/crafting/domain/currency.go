@@ -5,9 +5,8 @@ import (
 )
 
 type CraftingContext struct {
-	Item   *Item
-	RNG    random.RNG
-	Tables []AffixDefinition
+	Item *Item
+	RNG  random.RNGer
 }
 
 type Currency interface {

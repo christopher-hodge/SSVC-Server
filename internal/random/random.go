@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type RNGer interface {
+	Intn(n int) int
+}
+
 type RNG struct {
 	r    *rand.Rand
 	seed int64
