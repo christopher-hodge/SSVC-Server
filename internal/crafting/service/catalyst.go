@@ -205,5 +205,4 @@ func (c *CatharticCatalyst) Apply(ctx *domain.CraftingContext) error {
 			return nil
 		},
 	})
-
 }

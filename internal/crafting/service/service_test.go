@@ -423,3 +423,78 @@ func TestCatharticCatalyst_Apply(t *testing.T) {
 		t.Errorf("Rarity after Apply = %v, want %v", rarityNames[ctx.Item.Rarity], rarityNames[expectedRarity])
 	}
 }
+
+func TestCatharticCatalyst_Apply_WithLockedMods(t *testing.T) {
+	ctx := newTestContext(domain.Rare)
+
+	ctx.Item.Prefixes = []domain.AffixDefinition{
+		{
+			ID:             "test_prefix",
+			Name:           "Test Prefix",
+			Type:           domain.Prefix,
+			Tags:           []string{"test"},
+			MinValue:       1,
+			MaxValue:       1,
+			DisplayedValue: 1,
+			Weight:         100,
+			MinLevel:       1,
+		},
+		{
+			ID:             "test_prefix_2",
+			Name:           "Test Prefix 2",
+			Type:           domain.Prefix,
+			Tags:           []string{"test"},
+			MinValue:       1,
+			MaxValue:       1,
+			DisplayedValue: 1,
+			Weight:         100,
+			MinLevel:       1,
+		},
+	}
+	ctx.Item.Suffixes = []domain.AffixDefinition{
+		{
+			ID:             "lock_prefixes",
+			Name:           "Lock Prefixes",
+			Type:           domain.Suffix,
+			Tags:           []string{"lock_prefixes"},
+			MinValue:       1,
+			MaxValue:       1,
+			DisplayedValue: 1,
+			Weight:         100,
+			MinLevel:       1,
+		},
+	}
+
+	c := &CatharticCatalyst{}
+
+	if err := c.Apply(ctx); err != nil {
+		t.Fatalf("Apply returned error: %v", err)
+	}
+
+	if ctx.Item.Integrity > 60 || ctx.Item.Integrity < 50 {
+		t.Errorf("Integrity after Apply = %d, want between 50 and 60", ctx.Item.Integrity)
+	}
+
+	totalAffixes := len(ctx.Item.Prefixes) + len(ctx.Item.Suffixes)
+	if totalAffixes < 2 || totalAffixes > 6 {
+		t.Errorf("Total affixes after Apply = %d, want between 2 and 6", totalAffixes)
+	}
+
+	foundPrefix := false
+	for _, p := range ctx.Item.Prefixes {
+		if p.ID == "test_prefix" {
+			foundPrefix = true
+		}
+	}
+
+	if !foundPrefix {
+		t.Errorf("Locked prefix was removed or changed: %+v", ctx.Item.Prefixes)
+	}
+
+	t.Logf("%v", ctx.Item)
+
+	expectedRarity := InferRarityFromAffixes(ctx.Item)
+	if ctx.Item.Rarity != expectedRarity {
+		t.Errorf("Rarity after Apply = %v, want %v", rarityNames[ctx.Item.Rarity], rarityNames[expectedRarity])
+	}
+}

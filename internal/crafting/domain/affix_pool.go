@@ -1,26 +1,76 @@
 package domain
 
-var AffixPool = []AffixDefinition{
+var BaseAffixes = []BaseAffix{
 	{
-		ID:             "life_flat_t1",
-		Name:           "Bull's",
-		Type:           Prefix,
-		Tags:           []string{"life"},
-		MinValue:       70,
-		MaxValue:       89,
-		DisplayedValue: 0,
-		Weight:         100,
-		MinLevel:       70,
+		ID:       "life_flat",
+		Name:     "Bull's",
+		Type:     Prefix,
+		Tags:     []string{"life"},
+		BaseMin:  10,
+		BaseMax:  13,
+		Weight:   1000,
+		MinLevel: 1,
 	},
 	{
-		ID:             "fire_res_t1",
-		Name:           "of Incombustibility",
-		Type:           Suffix,
-		Tags:           []string{"fire", "resistance"},
-		MinValue:       41,
-		MaxValue:       45,
-		DisplayedValue: 0,
-		Weight:         120,
-		MinLevel:       60,
+		ID:       "life_regen",
+		Name:     "Hydra's",
+		Type:     Prefix,
+		Tags:     []string{"life", "recover"},
+		BaseMin:  5,
+		BaseMax:  8,
+		Weight:   1000,
+		MinLevel: 1,
 	},
+	{
+		ID:       "ego_flat",
+		Name:     "Mage's",
+		Type:     Prefix,
+		Tags:     []string{"ego"},
+		BaseMin:  5,
+		BaseMax:  8,
+		Weight:   1000,
+		MinLevel: 1,
+	},
+	{
+		ID:       "lightning_res",
+		Name:     "of Grounding",
+		Type:     Suffix,
+		Tags:     []string{"lightning", "resistance"},
+		BaseMin:  10,
+		BaseMax:  13,
+		Weight:   1000,
+		MinLevel: 1,
+	},
+	{
+		ID:       "cold_res",
+		Name:     "of Insulation",
+		Type:     Suffix,
+		Tags:     []string{"cold", "resistance"},
+		BaseMin:  10,
+		BaseMax:  13,
+		Weight:   1000,
+		MinLevel: 1,
+	},
+	{
+		ID:       "fire_res",
+		Name:     "of Incombustibility",
+		Type:     Suffix,
+		Tags:     []string{"fire", "resistance"},
+		BaseMin:  10,
+		BaseMax:  13,
+		Weight:   1000,
+		MinLevel: 1,
+	},
+}
+
+var AffixPool = []AffixDefinition{}
+
+func InitAffixPool() {
+	tierCount := 10
+	for _, base := range BaseAffixes {
+		for tier := 1; tier <= tierCount; tier++ {
+			affix := GenerateAffix(base, tier)
+			AffixPool = append(AffixPool, affix)
+		}
+	}
 }
