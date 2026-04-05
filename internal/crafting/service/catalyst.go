@@ -85,12 +85,19 @@ func InferAndSetRarity() CraftStep {
 func RemoveIntegrity(subtractRange int) CraftStep {
 	return func(ctx *domain.CraftingContext) error {
 
-		if ctx.Item.Integrity != 0 {
-			ctx.Item.Integrity = ctx.Item.Integrity - ctx.RNG.Intn(subtractRange) + 1
-			return nil
-		} else {
-			return errors.New("No item Integrity to remove.")
+		if ctx.Item.Integrity <= 0 {
+			return errors.New("No integrity to remove.")
 		}
+
+		amount := ctx.RNG.Intn(subtractRange) + 1
+
+		ctx.Item.Integrity -= amount
+
+		if ctx.Item.Integrity < 0 {
+			ctx.Item.Integrity = 0
+		}
+
+		return nil
 	}
 }
 
