@@ -182,6 +182,8 @@ func (c *LustratingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain
 	})
 }
 
+//Special Catalyst Crafting functions
+
 func (c *CatharsisCatalyst) Apply(ctx *domain.CraftingContext) error {
 
 	count := ctx.RNG.Intn(6) + 1
