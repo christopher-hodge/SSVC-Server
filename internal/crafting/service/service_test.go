@@ -186,6 +186,57 @@ func TestRemoveIntegrity(t *testing.T) {
 	}
 }
 
+func TestAddIntegrity(t *testing.T) {
+	tests := []struct {
+		name           string
+		startIntegrity int
+		addAmount      int
+		wantIntegrity  int
+		wantErr        error
+	}{
+		{
+			name:           "Add integrity below max",
+			startIntegrity: 50,
+			addAmount:      20,
+			wantIntegrity:  70,
+			wantErr:        nil,
+		},
+		{
+			name:           "Add integrity reaching max",
+			startIntegrity: 90,
+			addAmount:      15,
+			wantIntegrity:  100, // Max is 100
+			wantErr:        nil,
+		},
+		{
+			name:           "No addition if integrity is full",
+			startIntegrity: 100,
+			addAmount:      10,
+			wantIntegrity:  100,
+			wantErr:        errors.New("No item Integrity to add."),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			item := &domain.Item{Integrity: tt.startIntegrity}
+			ctx := &domain.CraftingContext{Item: item}
+
+			step := AddIntegrity(tt.addAmount)
+			err := step(ctx)
+
+			if (err != nil && tt.wantErr == nil) || (err == nil && tt.wantErr != nil) ||
+				(err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error()) {
+				t.Fatalf("unexpected error: got %v, want %v", err, tt.wantErr)
+			}
+
+			if ctx.Item.Integrity != tt.wantIntegrity {
+				t.Errorf("unexpected integrity: got %d, want %d", ctx.Item.Integrity, tt.wantIntegrity)
+			}
+		})
+	}
+}
+
 //Catalyst Tests
 
 func TestImbuementCatalyst(t *testing.T) {
@@ -249,6 +300,12 @@ func TestElevatingCatalyst(t *testing.T) {
 
 func TestAscendantCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
+
+	domain.AffixPool = append(domain.AffixPool,
+		domain.AffixDefinition{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, Weight: 100, MinLevel: 1},
+		domain.AffixDefinition{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, Weight: 100, MinLevel: 1},
+	)
+
 	ctx.Item.Prefixes = []domain.AffixDefinition{{ID: "test_prefix", Name: "test_prefix", Type: domain.Prefix, Tags: []string{"test_prefix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 	ctx.Item.Suffixes = []domain.AffixDefinition{{ID: "test_suffix", Name: "test_suffix", Type: domain.Suffix, Tags: []string{"test_suffix"}, MinValue: 1, MaxValue: 1, DisplayedValue: 1, Weight: 100, MinLevel: 1}}
 
@@ -271,6 +328,9 @@ func TestAscendantCatalyst(t *testing.T) {
 func TestDefiantCatalyst(t *testing.T) {
 	ctx := newTestContext(domain.Rare)
 
+	ctx.Item.Prefixes = []domain.AffixDefinition{}
+	ctx.Item.Suffixes = []domain.AffixDefinition{}
+
 	c := &DefiantCatalyst{}
 	if err := c.Apply(ctx); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -281,14 +341,14 @@ func TestDefiantCatalyst(t *testing.T) {
 	}
 
 	if len(ctx.Item.Prefixes) < 1 || len(ctx.Item.Suffixes) < 1 {
-		t.Fatal("expected between 1 and 6 affixes applied")
+		t.Fatal("expected between 1 and 3 affixes applied")
 	}
 
 	if len(ctx.Item.Prefixes) < 3 || len(ctx.Item.Suffixes) < 3 {
 		t.Fatal("expected at least 3 affixes applied")
 	}
 
-	if len(ctx.Item.Prefixes) > 6 || len(ctx.Item.Suffixes) > 6 {
+	if len(ctx.Item.Prefixes) > 3 || len(ctx.Item.Suffixes) > 3 {
 		t.Fatal("too many affixes applied, expected between 1 and 6")
 	}
 }

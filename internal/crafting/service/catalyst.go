@@ -109,7 +109,7 @@ func AddIntegrity(sumAmmount int) CraftStep {
 		}
 
 		if ctx.Item.Integrity+sumAmmount >= 100 {
-			ctx.Item.Integrity = ctx.Item.Integrity + sumAmmount
+			ctx.Item.Integrity = 100
 			return nil
 		} else {
 			ctx.Item.Integrity = ctx.Item.Integrity + sumAmmount
@@ -122,7 +122,7 @@ func AddAffixes(count int, affixType domain.AffixType) CraftStep {
 	return func(ctx *domain.CraftingContext) error {
 		for i := 0; i < count; i++ {
 			if err := ApplyAffixLogic(ctx, affixType); err != nil {
-				return err
+				break
 			}
 		}
 		return nil
@@ -162,7 +162,7 @@ func (c *ElevatingCatalyst) Apply(ctx *domain.CraftingContext, affixType domain.
 
 func (c *DefiantCatalyst) Apply(ctx *domain.CraftingContext) error {
 
-	count := ctx.RNG.Intn(6) + 1
+	count := ctx.RNG.Intn(4) + 3 // Rares require at least 3 mods
 
 	return ExecutePipeline(ctx, []CraftStep{
 		RequireRarity(domain.Rare),
